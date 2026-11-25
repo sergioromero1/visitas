@@ -70,7 +70,17 @@ Luego se abre http://localhost:5501. Mientras `firebase-config.js` diga `REEMPLA
 6. **Configuración del proyecto (engranaje) → Tus apps → Web (`</>`) →** registrar la app y copiar los valores de `firebaseConfig` en `firebase-config.js`.
 7. **Authentication → Configuración → Dominios autorizados →** agregar el dominio de Cloudflare (por ejemplo `dak-visitas.pages.dev`).
 
-## Publicar en Cloudflare Pages
+## Publicar en GitHub Pages (versión actual)
+
+Repositorio: `github.com/sergioromero1/visitas`, publicado en https://sergioromero1.github.io/visitas/. En la cuenta gratuita de GitHub, Pages exige que el repositorio sea **público**; el código queda a la vista, pero los datos siguen protegidos por el ingreso con Google y la lista de autorizados.
+
+1. `git push` a `main`.
+2. En el repositorio: **Settings → Pages → Build and deployment → Source: Deploy from a branch →** rama `main`, carpeta `/ (root)` → **Save**. Tarda uno o dos minutos.
+3. En Firebase: **Authentication → Configuración → Dominios autorizados → Agregar dominio** `sergioromero1.github.io`.
+
+Cada `git push` a `main` publica la versión nueva. El archivo `.nojekyll` evita que GitHub procese el sitio con Jekyll. Todas las rutas de la app son relativas, por eso funciona dentro de la subcarpeta `/visitas/`.
+
+## Publicar en Cloudflare Pages (alternativa, con repositorio privado)
 
 1. Crear un repositorio **privado** vacío en GitHub y subir este código:
    ```
