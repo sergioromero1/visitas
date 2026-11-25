@@ -164,7 +164,7 @@ function pantallaIngreso() {
   E.pantalla = 'ingreso';
   app.innerHTML = `
     <div class="ingreso"><div class="ingreso-tarjeta">
-      <img src="iconos/icono-192.png" alt="DAK" class="ingreso-logo">
+      <img src="iconos/logo-dak.png" alt="DAK" class="ingreso-logo">
       <h1>Visitas de inspección</h1>
       <p>Registro de hallazgos en campo con fotos ubicadas sobre el plano.</p>
       <button class="btn primario grande" id="b-google">Continuar con Google</button>
@@ -185,7 +185,7 @@ function pantallaNoAutorizado() {
     : 'Tu cuenta no está autorizada. Pide al administrador de DAK que la agregue a la lista de usuarios.';
   app.innerHTML = `
     <div class="ingreso"><div class="ingreso-tarjeta">
-      <img src="iconos/icono-192.png" alt="DAK" class="ingreso-logo">
+      <img src="iconos/logo-dak.png" alt="DAK" class="ingreso-logo">
       <h1>Acceso restringido</h1>
       <p><b>${esc(E.usuario.email)}</b></p>
       <p>${msg}</p>

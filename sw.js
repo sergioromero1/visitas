@@ -6,13 +6,13 @@
 //  - Firestore y el ingreso con Google no pasan por aquí.
 // ─────────────────────────────────────────────
 
-const CACHE = 'dak-visitas-v1';
+const CACHE = 'dak-visitas-v2';
 const CACHE_CDN = 'dak-visitas-cdn-v1';
 const BASE = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest', 'firebase-config.js',
   'js/app.js', 'js/nube.js', 'js/almacen.js', 'js/util.js', 'js/catalogos.js',
   'js/imagenes.js', 'js/plano.js', 'js/exportar.js',
-  'iconos/icono-96.png', 'iconos/icono-192.png', 'iconos/icono-512.png'
+  'iconos/icono-96.png', 'iconos/icono-192.png', 'iconos/icono-512.png', 'iconos/logo-dak.png'
 ];
 const CDN = ['https://www.gstatic.com/firebasejs/', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@'];
 

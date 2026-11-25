@@ -285,7 +285,7 @@ export async function abrirVistaImpresion(ctx, progreso = () => {}) {
     </div>
     <article class="imp-doc">
       <header class="imp-cab">
-        <img src="iconos/icono-96.png" alt="DAK" class="imp-logo">
+        <img src="iconos/logo-dak.png" alt="DAK" class="imp-logo">
         <div><h1>Registro de visita de inspección</h1><p>${esc(p.nombre)}</p></div>
       </header>
       <table class="imp-ficha">
