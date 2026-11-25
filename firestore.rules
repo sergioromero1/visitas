@@ -1,0 +1,30 @@
+rules_version = '2';
+
+// Solo entran los correos que estén en la colección "autorizados" (id del documento = correo en minúsculas).
+// Todos los autorizados comparten proyectos, visitas, planos, hallazgos y fotos.
+// Solo un autorizado con rol "admin" puede agregar o quitar usuarios.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autorizado() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/autorizados/$(request.auth.token.email));
+    }
+
+    function admin() {
+      return autorizado()
+        && get(/databases/$(database)/documents/autorizados/$(request.auth.token.email)).data.rol == 'admin';
+    }
+
+    match /autorizados/{correo} {
+      allow read: if request.auth != null && (request.auth.token.email == correo || autorizado());
+      allow write: if admin();
+    }
+
+    match /{coleccion}/{id} {
+      allow read, write: if autorizado()
+        && coleccion in ['proyectos', 'visitas', 'planos', 'hallazgos', 'fotos', 'trozos'];
+    }
+  }
+}
