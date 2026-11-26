@@ -383,8 +383,12 @@ async function formNuevaVisita(p) {
   if (!r.valor) return;
   const v = n => r.form.elements[n].value.trim();
   const id = nuevoId();
+  // La ficha estructural se copia de la visita más reciente del proyecto que la tenga
+  const anterior = E.visitas.filter(x => x.proyectoId === p.id && x.ficha && Object.keys(x.ficha).length)
+    .sort((a, b) => (b.fecha || '').localeCompare(a.fecha || '') || (b.creadoEn || 0) - (a.creadoEn || 0))[0];
   nube.guardar('visitas', id, {
     proyectoId: p.id, fecha: v('fecha'), tipo: v('tipo'), asistentes: v('asistentes'), objetivo: v('objetivo'),
+    ...(anterior ? { ficha: anterior.ficha } : {}),
     creadoEn: Date.now(), autor: E.usuario.email
   });
   E.tab = 'plano';
@@ -457,6 +461,7 @@ function construirVisita() {
   $('#lista-hallazgos').addEventListener('click', e => { const t = e.target.closest('[data-h]'); if (t) ir({ ...rutaVisita(), h: t.dataset.h }); });
   $('#form-visita').addEventListener('input', guardarFormVisita);
   $('#form-visita').addEventListener('change', guardarFormVisita);
+  $('#form-visita').addEventListener('click', tocarChipFicha);
   $('#bloque-exportar').addEventListener('click', e => {
     const acc = e.target.closest('[data-acc]')?.dataset.acc;
     if (acc === 'zip') accionZip();
@@ -708,15 +713,62 @@ function pintarFormVisita() {
       <label>Tipo<select name="tipo">${C.TIPOS_VISITA.map(t => `<option ${v.tipo === t ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
     </div>
     <label>Asistentes<input name="asistentes" maxlength="200" value="${esc(v.asistentes)}"></label>
-    <label>Objetivo y observaciones generales<textarea name="objetivo" rows="4" placeholder="Estado general, uso, año de construcción, sistema estructural, reformas…">${esc(v.objetivo)}</textarea></label>`;
+    <label>Objetivo y observaciones generales<textarea name="objetivo" rows="4" placeholder="Motivo de la visita, quién la solicita, impresión general…">${esc(v.objetivo)}</textarea></label>
+    ${htmlFichaEstructural(v.ficha || {})}`;
 }
 
-const guardarCampoVisita = debouncePorClave((id, campo, valor) => nube.guardar('visitas', id, { [campo]: valor }), 500);
+// Ficha estructural: campos fijos de la edificación, guardados en visita.ficha
+function htmlFichaEstructural(f) {
+  const chips = (campo, lista, tipo = 'uno') => `<div class="chips" data-ficha="${campo}" data-tipo="${tipo}">${lista.map(x =>
+    tipo === 'varios' ? chip(x, (f[campo] || []).includes(x)) : chip(x, f[campo] === x)).join('')}</div>`;
+  const califica = (campo, lista) => `<div class="chips" data-ficha="${campo}" data-tipo="uno">${lista.map(x =>
+    `<button type="button" class="chip sev ${f[campo] === x.id ? 'activo' : ''}" data-valor="${esc(x.id)}" style="--c:${x.color}">${esc(x.id)}</button>`).join('')}</div>`;
+  return `
+    <h3>Ficha estructural</h3>
+    <div class="fila3">
+      <label>Año de construcción<input name="ficha.anio" value="${esc(f.anio)}" maxlength="20" inputmode="numeric" placeholder="Ej. 1985"></label>
+      <label>N.° de pisos<input name="ficha.pisos" value="${esc(f.pisos)}" maxlength="6" inputmode="numeric"></label>
+      <label>Sótanos<input name="ficha.sotanos" value="${esc(f.sotanos)}" maxlength="6" inputmode="numeric"></label>
+    </div>
+    <fieldset><legend>Uso</legend>${chips('uso', C.USOS)}</fieldset>
+    <fieldset><legend>Sistema estructural <small>(uno o varios)</small></legend>${chips('sistema', C.SISTEMAS, 'varios')}</fieldset>
+    <fieldset><legend>Entrepiso</legend>${chips('entrepiso', C.ENTREPISOS)}</fieldset>
+    <fieldset><legend>Calidad constructiva</legend>${califica('calidad', C.CALIDADES)}</fieldset>
+    <fieldset><legend>Estado de conservación</legend>${califica('estado', C.ESTADOS)}</fieldset>
+    <fieldset><legend>Muros retirados o modificados</legend>${chips('muros', C.MUROS_RETIRADOS)}</fieldset>
+    <label>Cuáles muros y dónde<textarea name="ficha.murosDetalle" rows="2" placeholder="Ej. Piso 1, muro eje B entre 2 y 3, retirado para ampliar el local">${esc(f.murosDetalle)}</textarea></label>
+    <label>Reformas y otras observaciones<textarea name="ficha.notas" rows="3" placeholder="Ampliaciones, pisos agregados, cambios de uso, reforzamientos anteriores…">${esc(f.notas)}</textarea></label>
+    <p class="nota">Al crear la siguiente visita del proyecto, la ficha se copia de esta para no volver a llenarla.</p>`;
+}
+
+// "ficha.anio" → { ficha: { anio } } (el guardado fusiona el mapa, sin pisar los demás campos)
+const datosCampo = (nombre, valor) => {
+  const [a, b] = nombre.split('.');
+  return b ? { [a]: { [b]: valor } } : { [a]: valor };
+};
+const guardarCampoVisita = debouncePorClave((id, datos) => nube.guardar('visitas', id, datos), 500);
 function guardarFormVisita(e) {
   const el = e.target;
   const v = visitaActual();
   if (!v || !el.name) return;
-  guardarCampoVisita(v.id + el.name, v.id, el.name, el.value);
+  guardarCampoVisita(v.id + el.name, v.id, datosCampo(el.name, el.value));
+}
+function tocarChipFicha(e) {
+  const c = e.target.closest('[data-ficha] .chip');
+  const v = visitaActual();
+  if (!c || !v) return;
+  const cont = c.parentElement;
+  let valor;
+  if (cont.dataset.tipo === 'uno') {
+    const estaba = c.classList.contains('activo');
+    $$('.chip', cont).forEach(x => x.classList.remove('activo'));
+    if (!estaba) c.classList.add('activo');
+    valor = estaba ? '' : c.dataset.valor;
+  } else {
+    c.classList.toggle('activo');
+    valor = $$('.chip.activo', cont).map(x => x.dataset.valor);
+  }
+  nube.guardar('visitas', v.id, { ficha: { [cont.dataset.ficha]: valor } });
 }
 
 // ── Exportar ──

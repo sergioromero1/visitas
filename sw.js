@@ -6,7 +6,7 @@
 //  - Firestore y el ingreso con Google no pasan por aquí.
 // ─────────────────────────────────────────────
 
-const CACHE = 'dak-visitas-v2';
+const CACHE = 'dak-visitas-v3';
 const CACHE_CDN = 'dak-visitas-cdn-v1';
 const BASE = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest', 'firebase-config.js',

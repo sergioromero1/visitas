@@ -135,6 +135,22 @@ async function fuentePlano(ctx, pl) {
   return { blob: null, completo: false };
 }
 
+// ── Ficha estructural: filas [campo, valor] con lo que esté lleno ──
+export function filasFicha(f = {}) {
+  const muros = [f.muros, f.murosDetalle].filter(Boolean).join(' — ');
+  return [
+    ['Año de construcción', f.anio],
+    ['Pisos', [f.pisos && `${f.pisos} piso(s)`, f.sotanos && f.sotanos !== '0' && `${f.sotanos} sótano(s)`].filter(Boolean).join(' + ')],
+    ['Uso', f.uso],
+    ['Sistema estructural', (f.sistema || []).join(', ')],
+    ['Entrepiso', f.entrepiso],
+    ['Calidad constructiva', f.calidad],
+    ['Estado de conservación', f.estado],
+    ['Muros retirados o modificados', muros],
+    ['Reformas y otras observaciones', f.notas]
+  ].filter(([, x]) => x);
+}
+
 // ── informe.md ──
 const celda = s => String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 
@@ -153,6 +169,12 @@ function informeMd(ctx, d) {
   fila('Exportado', `${fechaHora(Date.now())} por ${ctx.usuario}`);
 
   if (v.objetivo) L.push('', '## Objetivo y observaciones generales', '', v.objetivo);
+
+  const ficha = filasFicha(v.ficha);
+  if (ficha.length) {
+    L.push('', '## Ficha estructural', '', '| Campo | Detalle |', '|---|---|');
+    ficha.forEach(([k, val]) => L.push(`| ${k} | ${celda(val)} |`));
+  }
 
   if (d.planos.length) {
     L.push('', '## Planos');
@@ -298,6 +320,7 @@ export async function abrirVistaImpresion(ctx, progreso = () => {}) {
         ${filaFicha('Generado', `${fechaHora(Date.now())} por ${ctx.usuario}`)}
       </table>
       ${v.objetivo ? `<h2>Objetivo y observaciones generales</h2><p class="imp-texto">${esc(v.objetivo)}</p>` : ''}
+      ${filasFicha(v.ficha).length ? `<h2>Ficha estructural</h2><table class="imp-ficha">${filasFicha(v.ficha).map(([k2, val]) => filaFicha(k2, val)).join('')}</table>` : ''}
       ${d.planos.map(pl => `
         <section class="imp-plano">
           <h2>P${pl.i} · ${esc(pl.pl.nombre || 'Plano')}${pl.pl.nivel ? ` (${esc(pl.pl.nivel)})` : ''}</h2>

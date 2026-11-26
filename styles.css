@@ -71,6 +71,8 @@ label > input, label > select, label > textarea { margin-top: 4px; }
 label.check { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--texto); font-weight: 500; }
 label.check input { width: 22px; height: 22px; margin: 0; accent-color: var(--negro); }
 .fila2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.fila3 { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 0 10px; }
+#form-visita h3:not(:first-child) { margin-top: 22px; }
 fieldset { border: 0; padding: 0; margin: 0 0 14px; }
 legend { font-size: 13px; font-weight: 600; color: var(--suave); margin-bottom: 6px; padding: 0; }
 legend small { font-weight: 400; }
@@ -336,8 +338,8 @@ button.tarjeta:hover { border-color: #aeb5bd; }
 .imp-doc h2 { font-size: 16px; margin: 22px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
 .imp-doc h3 { font-size: 14.5px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
 .imp-ficha { border-collapse: collapse; width: 100%; }
-.imp-ficha th { text-align: left; width: 140px; color: #555; font-weight: 600; padding: 3px 8px 3px 0; vertical-align: top; }
-.imp-ficha td { padding: 3px 0; }
+.imp-ficha th { text-align: left; width: 190px; color: #555; font-weight: 600; padding: 3px 8px 3px 0; vertical-align: top; }
+.imp-ficha td { padding: 3px 0; white-space: pre-wrap; }
 .imp-tabla { border-collapse: collapse; width: 100%; font-size: 12px; }
 .imp-tabla th, .imp-tabla td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
 .imp-tabla th { background: #f1f2f4; }
